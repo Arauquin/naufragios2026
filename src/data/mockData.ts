@@ -17,78 +17,16 @@ import {
 export const INITIAL_USERS: User[] = [
   { 
     id: 1, 
-    name: 'Dr. Carlos Ortega (Superadmin)', 
-    email: 'admin@naufragiospanama.gob.pa', 
+    name: 'Francisco Fernández', 
+    email: 'arauquin09@gmail.com', 
     role: 'superadmin', 
     is_active: true, 
-    institution: 'Universidad Central de Venezuela (UCV) / Proyecto Panamá',
-    investigation_purpose: 'Coordinador general del proyecto arqueológico e histórico transístmico.',
+    institution: 'Administración General del Sistema',
+    investigation_purpose: 'Propietario y Superadministrador del Sistema Histórico de Naufragios y Toponimia.',
     status: 'approved',
-    last_login_at: '2026-09-26 10:14:22', 
+    last_login_at: '2026-09-26 12:00:00', 
     last_login_ip: '190.140.22.81',
-    created_at: '2024-01-01 08:00:00'
-  },
-  { 
-    id: 2, 
-    name: 'Dra. María Leal Cuervo (Editor)', 
-    email: 'mleal@up.ac.pa', 
-    role: 'editor', 
-    is_active: true, 
-    institution: 'Universidad de Panamá (UP) - Depto. de Historia y Antropología',
-    investigation_purpose: 'Investigadora principal: catalogación de naves de la Flota de Tierra Firme y paleografía.',
-    status: 'approved',
-    last_login_at: '2026-09-26 09:30:11', 
-    last_login_ip: '186.72.105.14',
-    created_at: '2024-01-15 11:20:00'
-  },
-  { 
-    id: 3, 
-    name: 'Lic. Tomás Fernández (Editor)', 
-    email: 'tfernandez@ucv.edu', 
-    role: 'editor', 
-    is_active: true, 
-    institution: 'Universidad Central de Venezuela (UCV) - Escuela de Geografía',
-    investigation_purpose: 'Cartografía histórica, georreferenciación WGS84 y toponimia colonial costera.',
-    status: 'approved',
-    last_login_at: '2026-09-25 16:45:00', 
-    last_login_ip: '190.140.22.85',
-    created_at: '2024-02-10 14:10:00'
-  },
-  { 
-    id: 4, 
-    name: 'Lic. Roberto Varela (Consultor)', 
-    email: 'rvarela@micultura.gob.pa', 
-    role: 'consultor', 
-    is_active: true, 
-    institution: 'Ministerio de Cultura de Panamá (MiCultura)',
-    investigation_purpose: 'Fiscalización de patrimonio histórico subacuático y consulta de expedientes de pecios.',
-    status: 'approved',
-    last_login_at: '2026-09-26 11:20:05', 
-    last_login_ip: '201.218.45.10',
-    created_at: '2024-03-01 09:30:00'
-  },
-  // Solicitudes pendientes de aprobación por el Administrador:
-  {
-    id: 5,
-    name: 'Dra. Elena Santamaría (Solicitante)',
-    email: 'esantamaria@usma.ac.pa',
-    role: 'consultor',
-    is_active: false,
-    institution: 'Universidad Católica Santa María La Antigua (USMA)',
-    investigation_purpose: 'Tesis doctoral sobre las rutas de navegación y comercio de plata en Portobelo durante el siglo XVII. Solicito rol de Editor para contrastar fuentes archivísticas del AGI.',
-    status: 'pending',
-    created_at: '2026-09-26 08:15:00'
-  },
-  {
-    id: 6,
-    name: 'Mtro. Jean-Luc Dupont (Solicitante)',
-    email: 'jl.dupont@sorbonne-universite.fr',
-    role: 'consultor',
-    is_active: false,
-    institution: 'Sorbonne Université / CNRS Arqueología Marítima',
-    investigation_purpose: 'Proyecto internacional de investigación sobre la carabela Vizcaína de Cristóbal Colón y arquitectura naval hispana.',
-    status: 'pending',
-    created_at: '2026-09-25 19:40:00'
+    created_at: '2026-01-01 00:00:00'
   }
 ];
 
@@ -647,43 +585,15 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 1,
     user_id: 1,
-    user_name: 'Dr. Carlos Ortega',
+    user_name: 'Francisco Fernández (Superadmin)',
     event: 'created',
-    auditable_type: 'App\\Models\\Buque',
+    auditable_type: 'App\\Models\\User',
     auditable_id: 1,
     old_values: null,
-    new_values: { nombre_buque: 'Nuestra Señora de la Encarnación', tipo: 'Nao mercante', nacionalidad: 'Española', anno: 1648 },
-    url: 'https://naufragios.panama.gob.pa/buques',
+    new_values: { name: 'Francisco Fernández', email: 'arauquin09@gmail.com', role: 'superadmin', is_active: 1 },
+    url: 'https://naufragios.panama.gob.pa/install',
     ip_address: '190.140.22.81',
     user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0.0.0 Safari/537.36',
-    created_at: '2026-09-24 10:15:32'
-  },
-  {
-    id: 2,
-    user_id: 2,
-    user_name: 'Dra. María Leal Cuervo',
-    event: 'updated',
-    auditable_type: 'App\\Models\\Hundimiento',
-    auditable_id: 1,
-    old_values: { profundidad_metros: 12.00, estado_conservacion: 'bueno' },
-    new_values: { profundidad_metros: 13.50, estado_conservacion: 'excelente' },
-    url: 'https://naufragios.panama.gob.pa/hundimientos/1',
-    ip_address: '186.72.105.14',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605.1.15',
-    created_at: '2026-09-25 14:22:10'
-  },
-  {
-    id: 3,
-    user_id: 3,
-    user_name: 'Lic. Tomás Fernández',
-    event: 'created',
-    auditable_type: 'App\\Models\\Toponimia',
-    auditable_id: 2,
-    old_values: null,
-    new_values: { nombre_actual: 'San Lorenzo el Real del Chagres', lengua_origen: 'Cueva / Español' },
-    url: 'https://naufragios.panama.gob.pa/toponimia',
-    ip_address: '190.140.22.85',
-    user_agent: 'Mozilla/5.0 (X11; Linux x86_64) Firefox/125.0',
-    created_at: '2026-09-26 09:44:05'
+    created_at: '2026-09-26 12:00:00'
   }
 ];

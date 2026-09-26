@@ -8,6 +8,9 @@ export interface User {
   email: string;
   role: UserRole;
   is_active: boolean;
+  verification_code?: string;
+  code_expires_at?: string;
+  requested_role?: 'consultor' | 'editor';
   institution?: string;
   investigation_purpose?: string;
   status?: 'pending' | 'approved' | 'rejected';

@@ -114,21 +114,51 @@ export default function App() {
     recordAudit('updated', 'App\\Models\\User', userId, { status: 'pending' }, { status: 'rejected' });
   };
 
-  const handleSubmitRegistrationRequest = (data: { name: string; email: string; institution: string; purpose: string }) => {
+  const handleSubmitRegistrationRequest = (data: { 
+    name: string; 
+    email: string; 
+    institution: string; 
+    purpose: string;
+    requested_role: 'consultor' | 'editor';
+    verification_code: string;
+  }): number => {
     const newId = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+    const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString().replace('T', ' ').substring(0, 19);
     const newUser: User = {
       id: newId,
       name: data.name,
       email: data.email,
-      role: 'consultor',
-      is_active: false,
+      role: data.requested_role,
+      requested_role: data.requested_role,
+      is_active: false, // Inactive until 6-digit OTP is verified
+      verification_code: data.verification_code,
+      code_expires_at: expires,
       institution: data.institution,
       investigation_purpose: data.purpose,
       status: 'pending',
       created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
     };
     setUsers((prev) => [newUser, ...prev]);
-    recordAudit('created', 'App\\Models\\User', newId, null, newUser);
+    recordAudit('created', 'App\\Models\\User', newId, null, { name: data.name, email: data.email, is_active: 0 });
+    return newId;
+  };
+
+  const handleVerifyOtp = (userId: number, otpCode: string): boolean => {
+    const targetUser = users.find((u) => u.id === userId);
+    if (!targetUser) return false;
+
+    if (targetUser.verification_code === otpCode) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === userId
+            ? { ...u, is_active: true, status: 'approved', verification_code: undefined }
+            : u
+        )
+      );
+      recordAudit('updated', 'App\\Models\\User', userId, { is_active: 0 }, { is_active: 1, email_verified: true });
+      return true;
+    }
+    return false;
   };
 
   // Handler to record audit log on mutations (mimicking owen-it/laravel-auditing)
@@ -140,9 +170,9 @@ export default function App() {
     new_values: Record<string, any> | null
   ) => {
     const roleNames: Record<UserRole, string> = {
-      superadmin: 'Dr. Carlos Ortega (Superadmin)',
+      superadmin: 'Francisco Fernández (Superadmin)',
       admin: 'Administrador General (Admin)',
-      editor: 'Dra. María Leal Cuervo (Editor/UP)',
+      editor: 'Investigador / Editor',
       consultor: 'Usuario Consultor (Público)'
     };
 
@@ -392,6 +422,7 @@ export default function App() {
             onApproveRequest={handleApproveRequest}
             onRejectRequest={handleRejectRequest}
             onSubmitRegistrationRequest={handleSubmitRegistrationRequest}
+            onVerifyOtp={handleVerifyOtp}
           />
         )}
 

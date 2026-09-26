@@ -26,7 +26,11 @@ CREATE TABLE \`users\` (
   \`email\` VARCHAR(200) NOT NULL UNIQUE,
   \`password\` VARCHAR(255) NOT NULL COMMENT 'Hash bcrypt con factor de coste >= 12',
   \`email_verified_at\` TIMESTAMP NULL DEFAULT NULL,
-  \`is_active\` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=activo, 0=suspendido',
+  \`verification_code\` VARCHAR(6) NULL DEFAULT NULL COMMENT 'Código OTP de 6 dígitos para validar existencia de correo',
+  \`code_expires_at\` TIMESTAMP NULL DEFAULT NULL COMMENT 'Expiración OTP (15 minutos)',
+  \`is_active\` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '0=inactivo (no verificado), 1=activo verificado',
+  \`institution\` VARCHAR(250) NULL COMMENT 'Universidad, Museo o Centro de Investigación',
+  \`investigation_purpose\` TEXT NULL COMMENT 'Propósito y justificación científica',
   \`last_login_at\` TIMESTAMP NULL DEFAULT NULL,
   \`last_login_ip\` VARCHAR(45) NULL DEFAULT NULL,
   \`remember_token\` VARCHAR(100) NULL DEFAULT NULL,
@@ -34,7 +38,8 @@ CREATE TABLE \`users\` (
   \`updated_at\` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   \`deleted_at\` TIMESTAMP NULL DEFAULT NULL COMMENT 'SoftDelete: auditoría forense',
   PRIMARY KEY (\`id\`),
-  INDEX \`idx_users_email\` (\`email\`)
+  INDEX \`idx_users_email\` (\`email\`),
+  INDEX \`idx_users_code\` (\`verification_code\`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
@@ -552,7 +557,11 @@ return new class extends Migration
             $table->string('email', 200)->unique();
             $table->string('password', 255)->comment('Hash bcrypt con coste >= 12');
             $table->timestamp('email_verified_at')->nullable();
-            $table->boolean('is_active')->default(true)->comment('1=activo, 0=suspendido');
+            $table->string('verification_code', 6)->nullable()->comment('Código OTP numérico de 6 dígitos');
+            $table->timestamp('code_expires_at')->nullable()->comment('Expiración OTP (15 minutos)');
+            $table->boolean('is_active')->default(false)->comment('0=inactivo no verificado, 1=activo');
+            $table->string('institution', 250)->nullable();
+            $table->text('investigation_purpose')->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->string('last_login_ip', 45)->nullable();
             $table->rememberToken();
@@ -560,6 +569,7 @@ return new class extends Migration
             $table->softDeletes()->comment('SoftDelete: no borra físicamente para análisis forense');
 
             $table->index('email');
+            $table->index('verification_code');
         });
     }
 
@@ -1324,44 +1334,23 @@ class SuperAdminSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     * ÚNICO usuario inicial del sistema: Propietario y Superadministrador.
      */
     public function run(): void
     {
         $superAdmin = User::firstOrCreate(
-            ['email' => 'admin@naufragiospanama.gob.pa'],
+            ['email' => 'arauquin09@gmail.com'],
             [
-                'name' => 'Administrador General UP-UCV',
-                'password' => Hash::make(env('SUPERADMIN_DEFAULT_PASSWORD', 'Seguridad#Panama2026!')),
+                'name' => 'Francisco Fernández',
+                'password' => Hash::make(env('SUPERADMIN_DEFAULT_PASSWORD', 'Panama#Maritimo2026!')),
                 'email_verified_at' => now(),
                 'is_active' => true,
+                'institution' => 'Administración General del Sistema',
+                'investigation_purpose' => 'Propietario y Superadministrador del Sistema Histórico de Naufragios y Toponimia.',
             ]
         );
 
         $superAdmin->assignRole('superadmin');
-
-        // Usuario Investigador / Editor de muestra
-        $investigador = User::firstOrCreate(
-            ['email' => 'investigador@naufragiospanama.gob.pa'],
-            [
-                'name' => 'Dra. María Leal Cuervo',
-                'password' => Hash::make('Investigacion#2026!'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-            ]
-        );
-        $investigador->assignRole('editor');
-
-        // Usuario Consultor Público
-        $consultor = User::firstOrCreate(
-            ['email' => 'publico@naufragiospanama.gob.pa'],
-            [
-                'name' => 'Consultor Académico Público',
-                'password' => Hash::make('Consultor#2026!'),
-                'email_verified_at' => now(),
-                'is_active' => true,
-            ]
-        );
-        $consultor->assignRole('consultor');
     }
 }
 `;
