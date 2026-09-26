@@ -1,0 +1,6 @@
+{
+  "name": "Sistema de Naufragios y Toponimia Panamá",
+  "description": "Sistema Web de Gestión de Base de Datos Histórica de Naufragios del Siglo XVI y XVII y Toponimia en Panamá (Laravel + MySQL)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
