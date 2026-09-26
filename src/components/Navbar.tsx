@@ -10,14 +10,19 @@ import {
   Menu, 
   X, 
   UserCheck, 
-  ChevronDown 
+  ChevronDown,
+  Users,
+  FileText
 } from 'lucide-react';
 
+export type ActiveNavTab = 'mapa' | 'buques' | 'toponimia' | 'usuarios' | 'pdf' | 'sql' | 'auditoria' | 'seguridad';
+
 interface NavbarProps {
-  currentTab: 'mapa' | 'buques' | 'toponimia' | 'sql' | 'auditoria' | 'seguridad';
-  onSelectTab: (tab: 'mapa' | 'buques' | 'toponimia' | 'sql' | 'auditoria' | 'seguridad') => void;
+  currentTab: ActiveNavTab;
+  onSelectTab: (tab: ActiveNavTab) => void;
   userRole: UserRole;
   onChangeRole: (role: UserRole) => void;
+  pendingRequestsCount?: number;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -25,18 +30,28 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectTab,
   userRole,
   onChangeRole,
+  pendingRequestsCount = 0,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
 
-  const navItems = [
-    { id: 'mapa', label: 'Mapa Interactivo', icon: MapIcon },
-    { id: 'buques', label: 'Naufragios (Buques)', icon: Anchor },
+  interface NavItem {
+    id: ActiveNavTab;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: number;
+  }
+
+  const navItems: NavItem[] = [
+    { id: 'mapa', label: 'Mapa', icon: MapIcon },
+    { id: 'buques', label: 'Naufragios', icon: Anchor },
     { id: 'toponimia', label: 'Toponimia', icon: Compass },
+    { id: 'usuarios', label: 'Usuarios & Registro', icon: Users, badge: pendingRequestsCount },
+    { id: 'pdf', label: 'Exportar PDF', icon: FileText },
     { id: 'sql', label: 'SQL & Migraciones', icon: Database },
     { id: 'auditoria', label: 'Auditoría', icon: History },
-    { id: 'seguridad', label: 'Ciberseguridad', icon: ShieldCheck },
-  ] as const;
+    { id: 'seguridad', label: 'Seguridad', icon: ShieldCheck },
+  ];
 
   const rolesList: { id: UserRole; label: string; desc: string }[] = [
     { id: 'superadmin', label: 'Superadmin', desc: 'Control total, auditoría, SoftDeletes y roles' },
@@ -81,7 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleTabClick(item.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors relative ${
                     isActive
                       ? 'bg-amber-500/15 text-amber-300 font-semibold border border-amber-500/30'
                       : 'text-slate-300 hover:text-white hover:bg-slate-900'
@@ -89,6 +104,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
+                  {Boolean(item.badge && item.badge > 0) && (
+                    <span className="px-1.5 py-0.2 rounded-full bg-red-500 text-white text-[9px] font-bold">
+                      {item.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -158,14 +178,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleTabClick(item.id)}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium ${
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium ${
                     isActive
                       ? 'bg-amber-500/20 text-amber-300 font-semibold'
                       : 'text-slate-300 hover:bg-slate-900'
                   }`}
                 >
-                  <Icon className="w-4 h-4 text-amber-400" />
-                  <span>{item.label}</span>
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="w-4 h-4 text-amber-400" />
+                    <span>{item.label}</span>
+                  </div>
+                  {Boolean(item.badge && item.badge > 0) && (
+                    <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                      {item.badge}
+                    </span>
+                  )}
                 </button>
               );
             })}

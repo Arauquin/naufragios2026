@@ -26,13 +26,17 @@ import {
   INITIAL_EVENTOS_NAUTICOS, 
   INITIAL_AUDIT_LOGS 
 } from './data/mockData';
-import { Navbar } from './components/Navbar';
+import { Navbar, ActiveNavTab } from './components/Navbar';
 import { InteractiveMap } from './components/InteractiveMap';
 import { BuquesModule } from './components/BuquesModule';
 import { ToponimiaModule } from './components/ToponimiaModule';
+import { UsersAdminModule } from './components/UsersAdminModule';
+import { PdfExportCenter } from './components/PdfExportCenter';
 import { SqlMigrationsViewer } from './components/SqlMigrationsViewer';
 import { AuditLogsModule } from './components/AuditLogsModule';
 import { SecurityGuideModule } from './components/SecurityGuideModule';
+import { INITIAL_USERS } from './data/mockData';
+import { User } from './types/database';
 import { 
   Anchor, 
   Compass, 
@@ -47,10 +51,11 @@ import {
 } from 'lucide-react';
 
 export default function App() {
-  const [currentTab, setCurrentTab] = useState<'mapa' | 'buques' | 'toponimia' | 'sql' | 'auditoria' | 'seguridad'>('mapa');
+  const [currentTab, setCurrentTab] = useState<ActiveNavTab>('mapa');
   const [userRole, setUserRole] = useState<UserRole>('superadmin');
 
   // Dynamic state for entities with soft-deletes and auditing
+  const [users, setUsers] = useState<User[]>(INITIAL_USERS);
   const [buques, setBuques] = useState<Buque[]>(INITIAL_BUQUES);
   const [hundimientos, setHundimientos] = useState<Hundimiento[]>(INITIAL_HUNDIMIENTOS);
   const [artefactos, setArtefactos] = useState<Artefacto[]>(INITIAL_ARTEFACTOS);
@@ -69,6 +74,62 @@ export default function App() {
 
   // PDF Export Modal State
   const [pdfModalBuque, setPdfModalBuque] = useState<Buque | null>(null);
+
+  // User Management Handlers (Admin / Superadmin)
+  const handleUpdateUserRole = (userId: number, newRole: UserRole) => {
+    const targetUser = users.find((u) => u.id === userId);
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+    );
+    recordAudit('updated', 'App\\Models\\User', userId, { role: targetUser?.role }, { role: newRole });
+  };
+
+  const handleToggleUserActive = (userId: number) => {
+    const targetUser = users.find((u) => u.id === userId);
+    const newStatus = !targetUser?.is_active;
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, is_active: newStatus } : u))
+    );
+    recordAudit('updated', 'App\\Models\\User', userId, { is_active: targetUser?.is_active }, { is_active: newStatus });
+  };
+
+  const handleApproveRequest = (userId: number, assignedRole: UserRole) => {
+    const targetUser = users.find((u) => u.id === userId);
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId
+          ? { ...u, role: assignedRole, status: 'approved', is_active: true }
+          : u
+      )
+    );
+    recordAudit('updated', 'App\\Models\\User', userId, { status: 'pending' }, { status: 'approved', role: assignedRole, is_active: true });
+  };
+
+  const handleRejectRequest = (userId: number) => {
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === userId ? { ...u, status: 'rejected', is_active: false } : u
+      )
+    );
+    recordAudit('updated', 'App\\Models\\User', userId, { status: 'pending' }, { status: 'rejected' });
+  };
+
+  const handleSubmitRegistrationRequest = (data: { name: string; email: string; institution: string; purpose: string }) => {
+    const newId = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+    const newUser: User = {
+      id: newId,
+      name: data.name,
+      email: data.email,
+      role: 'consultor',
+      is_active: false,
+      institution: data.institution,
+      investigation_purpose: data.purpose,
+      status: 'pending',
+      created_at: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    };
+    setUsers((prev) => [newUser, ...prev]);
+    recordAudit('created', 'App\\Models\\User', newId, null, newUser);
+  };
 
   // Handler to record audit log on mutations (mimicking owen-it/laravel-auditing)
   const recordAudit = (
@@ -215,6 +276,7 @@ export default function App() {
         onSelectTab={setCurrentTab}
         userRole={userRole}
         onChangeRole={setUserRole}
+        pendingRequestsCount={users.filter((u) => u.status === 'pending').length}
       />
 
       {/* Main Content Area */}
@@ -235,12 +297,18 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3 self-start md:self-auto">
+              <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
                 <button
-                  onClick={() => setCurrentTab('sql')}
+                  onClick={() => setCurrentTab('pdf')}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-lg transition-colors border border-slate-700 shadow"
+                >
+                  <Printer className="w-3.5 h-3.5 text-amber-400" /> Exportar Informes PDF
+                </button>
+                <button
+                  onClick={() => setCurrentTab('usuarios')}
                   className="flex items-center gap-1.5 px-3 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs rounded-lg transition-colors shadow-md"
                 >
-                  <Database className="w-3.5 h-3.5" /> Ver SQL & Migraciones
+                  <Database className="w-3.5 h-3.5" /> Solicitudes &amp; Roles
                 </button>
               </div>
             </div>
@@ -312,6 +380,30 @@ export default function App() {
             onSelectToponimia={setSelectedToponimiaId}
             onSaveToponimia={handleSaveToponimia}
             onDeleteToponimia={handleDeleteToponimia}
+          />
+        )}
+
+        {currentTab === 'usuarios' && (
+          <UsersAdminModule
+            users={users}
+            userRole={userRole}
+            onUpdateUserRole={handleUpdateUserRole}
+            onToggleUserActive={handleToggleUserActive}
+            onApproveRequest={handleApproveRequest}
+            onRejectRequest={handleRejectRequest}
+            onSubmitRegistrationRequest={handleSubmitRegistrationRequest}
+          />
+        )}
+
+        {currentTab === 'pdf' && (
+          <PdfExportCenter
+            buques={buques}
+            hundimientos={hundimientos}
+            artefactos={artefactos}
+            capitanes={capitanes}
+            toponimias={toponimias}
+            ubicaciones={ubicaciones}
+            userRole={userRole}
           />
         )}
 

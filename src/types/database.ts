@@ -8,8 +8,12 @@ export interface User {
   email: string;
   role: UserRole;
   is_active: boolean;
+  institution?: string;
+  investigation_purpose?: string;
+  status?: 'pending' | 'approved' | 'rejected';
   last_login_at?: string;
   last_login_ip?: string;
+  created_at?: string;
 }
 
 export interface Buque {

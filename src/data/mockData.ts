@@ -15,10 +15,81 @@ import {
 } from '../types/database';
 
 export const INITIAL_USERS: User[] = [
-  { id: 1, name: 'Dr. Carlos Ortega (Superadmin)', email: 'admin@naufragiospanama.gob.pa', role: 'superadmin', is_active: true, last_login_at: '2026-09-26 10:14:22', last_login_ip: '190.140.22.81' },
-  { id: 2, name: 'Dra. María Leal Cuervo (Editor)', email: 'mleal@up.ac.pa', role: 'editor', is_active: true, last_login_at: '2026-09-26 09:30:11', last_login_ip: '186.72.105.14' },
-  { id: 3, name: 'Lic. Tomás Fernández (Editor)', email: 'tfernandez@ucv.edu', role: 'editor', is_active: true, last_login_at: '2026-09-25 16:45:00', last_login_ip: '190.140.22.85' },
-  { id: 4, name: 'Investigador Invitado (Consultor)', email: 'investigador.publico@red-academica.org', role: 'consultor', is_active: true, last_login_at: '2026-09-26 11:20:05', last_login_ip: '201.218.45.10' }
+  { 
+    id: 1, 
+    name: 'Dr. Carlos Ortega (Superadmin)', 
+    email: 'admin@naufragiospanama.gob.pa', 
+    role: 'superadmin', 
+    is_active: true, 
+    institution: 'Universidad Central de Venezuela (UCV) / Proyecto Panamá',
+    investigation_purpose: 'Coordinador general del proyecto arqueológico e histórico transístmico.',
+    status: 'approved',
+    last_login_at: '2026-09-26 10:14:22', 
+    last_login_ip: '190.140.22.81',
+    created_at: '2024-01-01 08:00:00'
+  },
+  { 
+    id: 2, 
+    name: 'Dra. María Leal Cuervo (Editor)', 
+    email: 'mleal@up.ac.pa', 
+    role: 'editor', 
+    is_active: true, 
+    institution: 'Universidad de Panamá (UP) - Depto. de Historia y Antropología',
+    investigation_purpose: 'Investigadora principal: catalogación de naves de la Flota de Tierra Firme y paleografía.',
+    status: 'approved',
+    last_login_at: '2026-09-26 09:30:11', 
+    last_login_ip: '186.72.105.14',
+    created_at: '2024-01-15 11:20:00'
+  },
+  { 
+    id: 3, 
+    name: 'Lic. Tomás Fernández (Editor)', 
+    email: 'tfernandez@ucv.edu', 
+    role: 'editor', 
+    is_active: true, 
+    institution: 'Universidad Central de Venezuela (UCV) - Escuela de Geografía',
+    investigation_purpose: 'Cartografía histórica, georreferenciación WGS84 y toponimia colonial costera.',
+    status: 'approved',
+    last_login_at: '2026-09-25 16:45:00', 
+    last_login_ip: '190.140.22.85',
+    created_at: '2024-02-10 14:10:00'
+  },
+  { 
+    id: 4, 
+    name: 'Lic. Roberto Varela (Consultor)', 
+    email: 'rvarela@micultura.gob.pa', 
+    role: 'consultor', 
+    is_active: true, 
+    institution: 'Ministerio de Cultura de Panamá (MiCultura)',
+    investigation_purpose: 'Fiscalización de patrimonio histórico subacuático y consulta de expedientes de pecios.',
+    status: 'approved',
+    last_login_at: '2026-09-26 11:20:05', 
+    last_login_ip: '201.218.45.10',
+    created_at: '2024-03-01 09:30:00'
+  },
+  // Solicitudes pendientes de aprobación por el Administrador:
+  {
+    id: 5,
+    name: 'Dra. Elena Santamaría (Solicitante)',
+    email: 'esantamaria@usma.ac.pa',
+    role: 'consultor',
+    is_active: false,
+    institution: 'Universidad Católica Santa María La Antigua (USMA)',
+    investigation_purpose: 'Tesis doctoral sobre las rutas de navegación y comercio de plata en Portobelo durante el siglo XVII. Solicito rol de Editor para contrastar fuentes archivísticas del AGI.',
+    status: 'pending',
+    created_at: '2026-09-26 08:15:00'
+  },
+  {
+    id: 6,
+    name: 'Mtro. Jean-Luc Dupont (Solicitante)',
+    email: 'jl.dupont@sorbonne-universite.fr',
+    role: 'consultor',
+    is_active: false,
+    institution: 'Sorbonne Université / CNRS Arqueología Marítima',
+    investigation_purpose: 'Proyecto internacional de investigación sobre la carabela Vizcaína de Cristóbal Colón y arquitectura naval hispana.',
+    status: 'pending',
+    created_at: '2026-09-25 19:40:00'
+  }
 ];
 
 export const INITIAL_BUQUES: Buque[] = [
